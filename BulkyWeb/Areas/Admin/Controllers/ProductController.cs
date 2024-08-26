@@ -3,7 +3,9 @@ using Bulky.DataAccess.Repository;
 using Bulky.DataAccess.Repository.IRepository;
 using Bulky.Models;
 using Bulky.Models.ViewModels;
+using Bulky.Utility;
 using BulkyWeb.DataAccess.Migrations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -13,6 +15,7 @@ namespace BulkyWeb.Areas.Admin.Controllers
 {
 
     [Area("Admin")]
+   // [Authorize(Roles = SD.Role_Admin)]
     public class ProductController : Controller
     {
         public readonly IUnitOfWork _unitOfWork;
@@ -71,26 +74,11 @@ namespace BulkyWeb.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-
                 string wwwRootPath = _webHostEnvironment.WebRootPath;
                 if (file != null)
                 {
                     string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                    string productPath = Path.Combine(wwwRootPath, @"images\product"); //+ productViewModel.Product.Id;
-                                                                                       // string finalPath = Path.Combine(wwwRootPath, productPath);
-                    /*if(!string.IsNullOrEmpty(productViewModel.Product.ImageUrl))
-                       {
-                       //deleete old img
-                       var oldImagePath = Path.Combine(wwwRootPath, productViewModel.Product.ImageUrl.TrimStart('\\'));
-                   if(System.IO.File.Exists(oldImagePath))
-
-                       {
-                           System.IO.File.Delete(oldImagePath);
-                       }
-                   }*/
-
-                    /*if (!Directory.Exists(finalPath))
-                        Directory.CreateDirectory(finalPath);*/
+                    string productPath = Path.Combine(wwwRootPath, @"images\product");
 
                     using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
                     {
@@ -99,28 +87,17 @@ namespace BulkyWeb.Areas.Admin.Controllers
 
                     productViewModel.Product.ImageUrl = @"images\product\" + fileName;
                 }
-                /*if (productViewModel.Product.Id == 0)
+
+                if (productViewModel.Product.Id == 0)
                 {
                     _unitOfWork.Product.Add(productViewModel.Product);
                 }
                 else
                 {
                     _unitOfWork.Product.Update(productViewModel.Product);
-                }*/
-                //_unitOfWork.Save();
-                /*  ProductImage productImage = new()
-                  {
-                      ImageUrl = @"\" + productPath + @"\" + fileName,
-                      ProductId = productViewModel.Product.Id,
-                  };*/
+                }
 
-                //if (productViewModel.Product.ProductImages == null)
-                //    productViewModel.Product.ProductImages = new List<ProductImage>();
-
-                //productViewModel.Product.ProductImages.Add(productImage);
-
-
-                _unitOfWork.Product.Update(productViewModel.Product);
+              _unitOfWork.Product.Update(productViewModel.Product);
                 _unitOfWork.Save();
 
                 TempData["success"] = "Product created/updated successfully";
@@ -141,26 +118,26 @@ namespace BulkyWeb.Areas.Admin.Controllers
 
 
 
-        //public IActionResult Create(ProductViewModel productViewModel)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        _unitOfWork.Product.Add(productViewModel.Product);
-        //        _unitOfWork.Save();
-        //        TempData["Success"] = "Product Created successfully";
-        //        return RedirectToAction("Index");
-        //    }
-        //    else
-        //    {
-        //        productViewModel.CategoryList = _unitOfWork.Category.GetAll().Select(u => new SelectListItem
-        //        {
-        //            Text = u.Name,
-        //            Value = u.Id.ToString()
-        //        });
+      /*  public IActionResult Create(ProductViewModel productViewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                _unitOfWork.Product.Add(productViewModel.Product);
+                _unitOfWork.Save();
+                TempData["Success"] = "Product Created successfully";
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                productViewModel.CategoryList = _unitOfWork.Category.GetAll().Select(u => new SelectListItem
+                {
+                    Text = u.Name,
+                    Value = u.Id.ToString()
+                });
 
-        //        return View(productViewModel);
-        //    }
-        //}
+                return View(productViewModel);
+            }
+        }*/
 
         public IActionResult Edit(int id)
         {
@@ -224,6 +201,7 @@ namespace BulkyWeb.Areas.Admin.Controllers
         public IActionResult GetAll()
         {
             List<Product> objProductList = _unitOfWork.Product.GetAll(includeProperties: "Category").ToList();
+
             return Json(new { data = objProductList });
         }
         [HttpDelete]
