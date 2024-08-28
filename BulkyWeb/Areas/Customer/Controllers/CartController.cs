@@ -120,13 +120,15 @@ namespace BulkyWeb.Areas.Customer.Controllers
 
             if (applicationuser.CompanyId.GetValueOrDefault() == 0)
             {
+                //customer
                 ShoppingCartViewModel.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
                 ShoppingCartViewModel.OrderHeader.OrderStatus = SD.StatusPending;
             }
             else
+            //company
             {
                 ShoppingCartViewModel.OrderHeader.PaymentStatus = SD.PaymentStatusDelayedPayment;
-                ShoppingCartViewModel.OrderHeader.PaymentStatus = SD.StatusApproved;
+                ShoppingCartViewModel.OrderHeader.OrderStatus = SD.StatusApproved;
             }
             _unitOfWork.OrderHeader.Add(ShoppingCartViewModel.OrderHeader);
             _unitOfWork.Save();
